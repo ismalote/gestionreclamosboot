@@ -1,7 +1,6 @@
 package com.gestionreclamos.web.app.controller;
 
 import java.io.IOException;
-import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uade.administracion.controlador.Controlador;
+import com.uade.administracion.daos.PersonaDAO;
 import com.uade.administracion.daos.ReclamoDAO;
 import com.uade.administracion.exceptions.EdificioException;
 import com.uade.administracion.exceptions.PersonaException;
 import com.uade.administracion.exceptions.ReclamoException;
 import com.uade.administracion.exceptions.UnidadException;
+import com.uade.administracion.modelo.Persona;
 import com.uade.administracion.modelo.Reclamo;
 import com.uade.administracion.modelo.UbicacionReclamo;
 import com.uade.administracion.views.ReclamoView;
@@ -31,18 +32,36 @@ import com.uade.administracion.views.ReclamoView;
 @Controller
 public class HomeController {
 
+	private String dni;
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
 	/**
 	 * Simply selects the home view to render by returning its name.
 	 */
 	@GetMapping("/")
-	public String home(Locale locale, Model model) {
-		logger.info("Welcome home! The client locale is {}.", locale);
-
-		model.addAttribute("titulo", "Gestión de Reclamos!");
+	public String home(Model model) {
+		model.addAttribute("titulo", "Ingresar DNI");
 
 		return "home";
+	}
+
+	@GetMapping("/misReclamos")
+	public String misReclamos(@RequestParam("dni") String dni, Model model) throws PersonaException {
+
+		model.addAttribute("titulo", "Mis Reclamos");
+		this.dni = dni;
+
+		return "misReclamos";
+	}
+
+	@GetMapping("/agregarReclamo")
+	public String agregarReclamo(Model model)
+			throws EdificioException, UnidadException, ReclamoException, PersonaException {
+
+		model.addAttribute("titulo", "Agregar reclamo");
+		model.addAttribute("edificios", Controlador.getInstancia().getEdificios());
+
+		return "agregarReclamo";
 	}
 
 	@GetMapping("/agregarImagen")
@@ -50,10 +69,10 @@ public class HomeController {
 
 		model.addAttribute("titulo", "Upload de foto");
 
-		return "formReclamo";
+		return "formImagenReclamo";
 	}
 
-	@PostMapping(value = "/formReclamo")
+	@PostMapping(value = "/formImagenReclamo")
 	public String reclamoForm(Model model, @RequestParam("idReclamo") String idReclamo,
 			@RequestParam("imagen") MultipartFile imagen)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, IOException {
@@ -63,11 +82,21 @@ public class HomeController {
 			reclamo.setImagen(imagen.getBytes());
 		}
 
-		reclamo = reclamo.update();
+		reclamo.update();
 
 		return "redirect:/";
 	}
-	
+
+	@GetMapping(value = "/formPersona")
+	public String saveReclamo(Model model, @RequestParam("dniPersona") String dniPersona)
+			throws EdificioException, UnidadException, ReclamoException, PersonaException {
+		Persona persona = PersonaDAO.getInstancia().findByID(dniPersona);
+
+		model.addAttribute("persona", "Agregar Reclamo");
+
+		return "formReclamo";
+	}
+
 	@PostMapping(value = "/add", consumes = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String addReclamo(@RequestBody String reclamoJson)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -82,7 +111,7 @@ public class HomeController {
 					(reclamo.getUnidadView() != null) ? reclamo.getUnidadView().getPiso() : null,
 					(reclamo.getUnidadView() != null) ? reclamo.getUnidadView().getNumero() : null,
 					reclamo.getImagen());
-			return mapper.writeValueAsString(reclamo);
+			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(reclamo);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "Hubo un error al intentar crear el reclamo.";
@@ -103,7 +132,8 @@ public class HomeController {
 	public @ResponseBody String getEdificios()
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writeValueAsString(Controlador.getInstancia().getEdificios());
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().getEdificios());
 		return json;
 	}
 
@@ -111,7 +141,8 @@ public class HomeController {
 	public @ResponseBody String getUnidadesPorEdificio(@PathVariable int idEdificio)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writeValueAsString(Controlador.getInstancia().getUnidadesPorEdificio(idEdificio));
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().getUnidadesPorEdificio(idEdificio));
 		return json;
 	}
 
@@ -119,7 +150,8 @@ public class HomeController {
 	public @ResponseBody String getHabilitadosPorEdificio(@PathVariable int idEdificio)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writeValueAsString(Controlador.getInstancia().habilitadosPorEdificio(idEdificio));
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().habilitadosPorEdificio(idEdificio));
 		return json;
 	}
 
@@ -127,7 +159,8 @@ public class HomeController {
 	public @ResponseBody String getDueniosPorEdificio(@PathVariable int idEdificio)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writeValueAsString(Controlador.getInstancia().dueniosPorEdificio(idEdificio));
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().dueniosPorEdificio(idEdificio));
 		return json;
 	}
 
@@ -135,7 +168,8 @@ public class HomeController {
 	public @ResponseBody String getInquilinosPorEdificio(@PathVariable int idEdificio)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writeValueAsString(Controlador.getInstancia().inquilinosPorEdificio(idEdificio));
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().inquilinosPorEdificio(idEdificio));
 		return json;
 	}
 
@@ -143,7 +177,8 @@ public class HomeController {
 	public @ResponseBody String getHabitantesPorEdificio(@PathVariable int idEdificio)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writeValueAsString(Controlador.getInstancia().habitantesPorEdificio(idEdificio));
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().habitantesPorEdificio(idEdificio));
 		return json;
 	}
 
@@ -153,7 +188,8 @@ public class HomeController {
 			@PathVariable String numero)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writeValueAsString(Controlador.getInstancia().dueniosPorUnidad(idEdificio, piso, numero));
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().dueniosPorUnidad(idEdificio, piso, numero));
 		return json;
 	}
 
@@ -163,16 +199,17 @@ public class HomeController {
 			@PathVariable String numero)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper
+		String json = mapper.writerWithDefaultPrettyPrinter()
 				.writeValueAsString(Controlador.getInstancia().inquilinosPorUnidad(idEdificio, piso, numero));
 		return json;
 	}
 
-	@GetMapping(value = "/reclamos", produces = { MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(value = "/consultarReclamos", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getReclamos()
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writeValueAsString(Controlador.getInstancia().getReclamos());
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().getReclamos());
 		return json;
 	}
 
@@ -180,7 +217,8 @@ public class HomeController {
 	public @ResponseBody String getReclamoById(@PathVariable int id)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writeValueAsString(Controlador.getInstancia().getReclamosById(id));
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().getReclamosById(id));
 		return json;
 	}
 
@@ -188,7 +226,8 @@ public class HomeController {
 	public @ResponseBody String getReclamosByEdifico(@PathVariable int edificioId)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writeValueAsString(Controlador.getInstancia().getReclamosByEdificio(edificioId));
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().getReclamosByEdificio(edificioId));
 		return json;
 	}
 
@@ -196,7 +235,8 @@ public class HomeController {
 	public @ResponseBody String getReclamosByUnidad(@PathVariable int idUnidad)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writeValueAsString(Controlador.getInstancia().getReclamosByUnidad(idUnidad));
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().getReclamosByUnidad(idUnidad));
 		return json;
 	}
 
@@ -204,7 +244,17 @@ public class HomeController {
 	public @ResponseBody String getReclamoByPersona(@PathVariable String documento)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writeValueAsString(Controlador.getInstancia().getReclamosByPersona(documento));
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().getReclamosByPersona(documento));
+		return json;
+	}
+
+	@GetMapping(value = "/reclamosPersona", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public @ResponseBody String getReclamoByPersonaDni()
+			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().getReclamosByPersona(dni));
 		return json;
 	}
 
