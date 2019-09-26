@@ -1,7 +1,6 @@
 package com.gestionreclamos.web.app.controller;
 
-import java.text.DateFormat;
-import java.util.Date;
+import java.io.IOException;
 import java.util.Locale;
 
 import org.slf4j.Logger;
@@ -13,15 +12,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uade.administracion.controlador.Controlador;
+import com.uade.administracion.daos.ReclamoDAO;
 import com.uade.administracion.exceptions.EdificioException;
 import com.uade.administracion.exceptions.PersonaException;
 import com.uade.administracion.exceptions.ReclamoException;
 import com.uade.administracion.exceptions.UnidadException;
+import com.uade.administracion.modelo.Reclamo;
 import com.uade.administracion.modelo.UbicacionReclamo;
 import com.uade.administracion.views.ReclamoView;
 
@@ -37,19 +40,53 @@ public class HomeController {
 	public String home(Locale locale, Model model) {
 		logger.info("Welcome home! The client locale is {}.", locale);
 
-		Date date = new Date();
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
-
-		String formattedDate = dateFormat.format(date);
-
-		model.addAttribute("serverTime", formattedDate);
+		model.addAttribute("titulo", "Gestión de Reclamos!");
 
 		return "home";
 	}
 
-	@PostMapping("/upload")
-	public String upload(Model model) {
-		return "EL upload se hizo correctamente.";
+	@GetMapping("/agregarImagen")
+	public String upload(Model model) throws EdificioException, UnidadException, ReclamoException, PersonaException {
+
+		model.addAttribute("titulo", "Upload de foto");
+
+		return "formReclamo";
+	}
+
+	@PostMapping(value = "/formReclamo")
+	public String reclamoForm(Model model, @RequestParam("idReclamo") String idReclamo,
+			@RequestParam("imagen") MultipartFile imagen)
+			throws EdificioException, UnidadException, ReclamoException, PersonaException, IOException {
+		Reclamo reclamo = ReclamoDAO.getInstancia().findByID(Integer.parseInt(idReclamo));
+
+		if (!imagen.isEmpty()) {
+			reclamo.setImagen(imagen.getBytes());
+		}
+
+		reclamo = reclamo.update();
+
+		return "redirect:/";
+	}
+	
+	@PostMapping(value = "/add", consumes = { MediaType.APPLICATION_JSON_VALUE })
+	public @ResponseBody String addReclamo(@RequestBody String reclamoJson)
+			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
+		ReclamoView reclamo;
+		System.out.println(reclamoJson);
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			reclamo = mapper.readValue(reclamoJson, ReclamoView.class);
+			reclamo = Controlador.getInstancia().agregarReclamo(reclamo.getPersonaView().getDocumento(),
+					reclamo.getEdificioView().getCodigo(), UbicacionReclamo.valueOf(reclamo.getUbicacion()),
+					reclamo.getDescripcion(),
+					(reclamo.getUnidadView() != null) ? reclamo.getUnidadView().getPiso() : null,
+					(reclamo.getUnidadView() != null) ? reclamo.getUnidadView().getNumero() : null,
+					reclamo.getImagen());
+			return mapper.writeValueAsString(reclamo);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "Hubo un error al intentar crear el reclamo.";
+		}
 	}
 
 	/**
@@ -171,24 +208,4 @@ public class HomeController {
 		return json;
 	}
 
-	@PostMapping(value = "/add", consumes = { MediaType.APPLICATION_JSON_VALUE })
-	public @ResponseBody String addReclamo(@RequestBody String reclamoJson)
-			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
-		ReclamoView reclamo;
-		System.out.println(reclamoJson);
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			reclamo = mapper.readValue(reclamoJson, ReclamoView.class);
-			reclamo = Controlador.getInstancia().agregarReclamo(reclamo.getPersonaView().getDocumento(),
-					reclamo.getEdificioView().getCodigo(), UbicacionReclamo.valueOf(reclamo.getUbicacion()),
-					reclamo.getDescripcion(),
-					(reclamo.getUnidadView() != null) ? reclamo.getUnidadView().getPiso() : null,
-					(reclamo.getUnidadView() != null) ? reclamo.getUnidadView().getNumero() : null,
-					reclamo.getImagen());
-			return mapper.writeValueAsString(reclamo);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return "Hubo un error al intentar crear el reclamo.";
-		}
-	}
 }
