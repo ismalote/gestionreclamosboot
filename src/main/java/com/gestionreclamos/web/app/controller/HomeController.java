@@ -1,7 +1,5 @@
 package com.gestionreclamos.web.app.controller;
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -11,92 +9,30 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uade.administracion.controlador.Controlador;
-import com.uade.administracion.daos.PersonaDAO;
-import com.uade.administracion.daos.ReclamoDAO;
 import com.uade.administracion.exceptions.EdificioException;
 import com.uade.administracion.exceptions.PersonaException;
 import com.uade.administracion.exceptions.ReclamoException;
 import com.uade.administracion.exceptions.UnidadException;
-import com.uade.administracion.modelo.Persona;
-import com.uade.administracion.modelo.Reclamo;
 import com.uade.administracion.modelo.UbicacionReclamo;
 import com.uade.administracion.views.ReclamoView;
 
 @Controller
 public class HomeController {
 
-	private String dni;
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
-	/**
-	 * Simply selects the home view to render by returning its name.
-	 */
 	@GetMapping("/")
 	public String home(Model model) {
-		model.addAttribute("titulo", "Ingresar DNI");
+		model.addAttribute("titulo", "Reclamos API REST");
 
 		return "home";
 	}
-
-	@GetMapping("/misReclamos")
-	public String misReclamos(@RequestParam("dni") String dni, Model model) throws PersonaException {
-
-		model.addAttribute("titulo", "Mis Reclamos");
-		this.dni = dni;
-
-		return "misReclamos";
-	}
-
-	@GetMapping("/agregarReclamo")
-	public String agregarReclamo(Model model)
-			throws EdificioException, UnidadException, ReclamoException, PersonaException {
-
-		model.addAttribute("titulo", "Agregar reclamo");
-		model.addAttribute("edificios", Controlador.getInstancia().getEdificios());
-
-		return "agregarReclamo";
-	}
-
-	@GetMapping("/agregarImagen")
-	public String upload(Model model) throws EdificioException, UnidadException, ReclamoException, PersonaException {
-
-		model.addAttribute("titulo", "Upload de foto");
-
-		return "formImagenReclamo";
-	}
-
-	@PostMapping(value = "/formImagenReclamo")
-	public String reclamoForm(Model model, @RequestParam("idReclamo") String idReclamo,
-			@RequestParam("imagen") MultipartFile imagen)
-			throws EdificioException, UnidadException, ReclamoException, PersonaException, IOException {
-		Reclamo reclamo = ReclamoDAO.getInstancia().findByID(Integer.parseInt(idReclamo));
-
-		if (!imagen.isEmpty()) {
-			reclamo.setImagen(imagen.getBytes());
-		}
-
-		reclamo.update();
-
-		return "redirect:/";
-	}
-
-	@GetMapping(value = "/formPersona")
-	public String saveReclamo(Model model, @RequestParam("dniPersona") String dniPersona)
-			throws EdificioException, UnidadException, ReclamoException, PersonaException {
-		Persona persona = PersonaDAO.getInstancia().findByID(dniPersona);
-
-		model.addAttribute("persona", "Agregar Reclamo");
-
-		return "formReclamo";
-	}
-
+	
 	@PostMapping(value = "/add", consumes = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String addReclamo(@RequestBody String reclamoJson)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -246,15 +182,6 @@ public class HomeController {
 		ObjectMapper mapper = new ObjectMapper();
 		String json = mapper.writerWithDefaultPrettyPrinter()
 				.writeValueAsString(Controlador.getInstancia().getReclamosByPersona(documento));
-		return json;
-	}
-
-	@GetMapping(value = "/reclamosPersona", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public @ResponseBody String getReclamoByPersonaDni()
-			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writerWithDefaultPrettyPrinter()
-				.writeValueAsString(Controlador.getInstancia().getReclamosByPersona(dni));
 		return json;
 	}
 
