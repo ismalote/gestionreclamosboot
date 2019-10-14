@@ -25,7 +25,7 @@ import com.uade.administracion.views.ReclamoView;
 @Controller
 public class HomeController {
 
-	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
 
 	@GetMapping("/")
 	public String home(Model model) {
@@ -33,7 +33,7 @@ public class HomeController {
 
 		return "home";
 	}
-	
+
 	@CrossOrigin(origins = "http://localhost:3000")
 	@PostMapping(value = "/add", consumes = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String addReclamo(@RequestBody String reclamoJson)
@@ -48,11 +48,12 @@ public class HomeController {
 					reclamo.getDescripcion(),
 					(reclamo.getUnidadView() != null) ? reclamo.getUnidadView().getPiso() : null,
 					(reclamo.getUnidadView() != null) ? reclamo.getUnidadView().getNumero() : null,
-					reclamo.getImagen());
-			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(reclamo);
+					reclamo.getImagenes());
+			LOGGER.info("El reclamo se ha generado correctamente.");
+			return "El reclamo fue generado correctamente con id: " + String.valueOf(reclamo.getIdReclamo());
 		} catch (Exception e) {
-			e.printStackTrace();
-			return "Hubo un error al intentar crear el reclamo.";
+			LOGGER.info(e.getMessage());
+			return e.getMessage();
 		}
 	}
 
@@ -70,6 +71,8 @@ public class HomeController {
 	@GetMapping(value = "/edificios", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getEdificios()
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
+		LOGGER.debug("Obteniendo listado de edificios");
+
 		ObjectMapper mapper = new ObjectMapper();
 		String json = mapper.writerWithDefaultPrettyPrinter()
 				.writeValueAsString(Controlador.getInstancia().getEdificios());
@@ -80,6 +83,8 @@ public class HomeController {
 	@GetMapping(value = "/unidadesPorEdificio/{idEdificio}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getUnidadesPorEdificio(@PathVariable int idEdificio)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
+		LOGGER.debug("Obteniendo unidades por edificio segun id: " + idEdificio);
+
 		ObjectMapper mapper = new ObjectMapper();
 		String json = mapper.writerWithDefaultPrettyPrinter()
 				.writeValueAsString(Controlador.getInstancia().getUnidadesPorEdificio(idEdificio));
@@ -113,16 +118,6 @@ public class HomeController {
 		ObjectMapper mapper = new ObjectMapper();
 		String json = mapper.writerWithDefaultPrettyPrinter()
 				.writeValueAsString(Controlador.getInstancia().inquilinosPorEdificio(idEdificio));
-		return json;
-	}
-	
-	@CrossOrigin(origins = "http://localhost:3000")
-	@GetMapping(value = "/habitantesPorEdificio/{idEdificio}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public @ResponseBody String getHabitantesPorEdificio(@PathVariable int idEdificio)
-			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writerWithDefaultPrettyPrinter()
-				.writeValueAsString(Controlador.getInstancia().habitantesPorEdificio(idEdificio));
 		return json;
 	}
 
@@ -179,7 +174,7 @@ public class HomeController {
 				.writeValueAsString(Controlador.getInstancia().getReclamosByEdificio(edificioId));
 		return json;
 	}
-	
+
 	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "/reclamos/unidad/{idUnidad}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getReclamosByUnidad(@PathVariable int idUnidad)
