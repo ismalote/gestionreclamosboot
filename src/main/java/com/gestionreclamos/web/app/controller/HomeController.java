@@ -195,4 +195,64 @@ public class HomeController {
 		return json;
 	}
 
+	@CrossOrigin(origins = "http://localhost:3000")
+	@GetMapping(value = "/unidadesPorPersona/{dni}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public @ResponseBody String getUnidadesPorPersona(@PathVariable String dni)
+			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
+		LOGGER.debug("Obteniendo unidades por persona segun dni: " + dni);
+
+		ObjectMapper mapper = new ObjectMapper();
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().unidadesPorPersona(dni));
+		return json;
+	}
+	
+	@CrossOrigin(origins = "http://localhost:3000")
+	@GetMapping(value = "/unidadesPorDuenio/{dni}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public @ResponseBody String getUnidadesPorDuenio(@PathVariable String dni)
+			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
+		LOGGER.debug("Obteniendo unidades por persona segun dni: " + dni);
+
+		ObjectMapper mapper = new ObjectMapper();
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().unidadesPorDuenio(dni));
+		return json;
+	}
+	
+	@CrossOrigin(origins = "http://localhost:3000")
+	@GetMapping(value = "/unidadesPorInquilino/{dni}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public @ResponseBody String getUnidadesPorInquilino(@PathVariable String dni)
+			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
+		LOGGER.debug("Obteniendo unidades por persona segun dni: " + dni);
+
+		ObjectMapper mapper = new ObjectMapper();
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().unidadesPorInquilino(dni));
+		return json;
+	}
+	
+	@CrossOrigin(origins = "http://localhost:3000")
+	@GetMapping(value = "/personas", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public @ResponseBody String getPersonas()
+			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
+		LOGGER.debug("Obteniendo listado de edificios");
+
+		ObjectMapper mapper = new ObjectMapper();
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().getPersonas());
+		return json;
+	}
+	
+	@CrossOrigin(origins = "http://localhost:3000")
+	@GetMapping(value = "/unidades", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public @ResponseBody String getUnidades()
+			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
+		LOGGER.debug("Obteniendo listado de edificios");
+
+		ObjectMapper mapper = new ObjectMapper();
+		String json = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(Controlador.getInstancia().getUnidades());
+		return json;
+	}
+
 }
