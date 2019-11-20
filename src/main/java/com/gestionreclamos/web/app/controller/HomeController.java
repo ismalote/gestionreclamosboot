@@ -23,6 +23,7 @@ import com.uade.administracion.modelo.UbicacionReclamo;
 import com.uade.administracion.views.ReclamoView;
 
 @Controller
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class HomeController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
@@ -34,7 +35,6 @@ public class HomeController {
 		return "home";
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
 	@PostMapping(value = "/add", consumes = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String addReclamo(@RequestBody String reclamoJson)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -67,7 +67,6 @@ public class HomeController {
 	 * @throws JsonProcessingException
 	 */
 
-	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "/edificios", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getEdificios()
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -79,7 +78,6 @@ public class HomeController {
 		return json;
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "/unidadesPorEdificio/{idEdificio}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getUnidadesPorEdificio(@PathVariable int idEdificio)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -91,7 +89,6 @@ public class HomeController {
 		return json;
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "/habilitadosPorEdificio/{idEdificio}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getHabilitadosPorEdificio(@PathVariable int idEdificio)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -101,7 +98,6 @@ public class HomeController {
 		return json;
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "/dueniosPorEdificio/{idEdificio}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getDueniosPorEdificio(@PathVariable int idEdificio)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -111,7 +107,6 @@ public class HomeController {
 		return json;
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "/inquilinosPorEdificio/{idEdificio}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getInquilinosPorEdificio(@PathVariable int idEdificio)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -121,7 +116,6 @@ public class HomeController {
 		return json;
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "/dueniosPorUnidad/{idEdificio}/{piso}/{numero}", produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getDueniosPorUnidad(@PathVariable int idEdificio, @PathVariable String piso,
@@ -133,7 +127,6 @@ public class HomeController {
 		return json;
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "/inquilinosPorUnidad/{idEdificio}/{piso}/{numero}", produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getInquilinosPorUnidad(@PathVariable int idEdificio, @PathVariable String piso,
@@ -145,7 +138,6 @@ public class HomeController {
 		return json;
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "/consultarReclamos", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getReclamos()
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -155,7 +147,6 @@ public class HomeController {
 		return json;
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "/reclamos/id/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getReclamoById(@PathVariable int id)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -165,7 +156,6 @@ public class HomeController {
 		return json;
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "/reclamos/edificio/{edificioId}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getReclamosByEdifico(@PathVariable int edificioId)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -175,7 +165,6 @@ public class HomeController {
 		return json;
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "/reclamos/unidad/{idUnidad}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getReclamosByUnidad(@PathVariable int idUnidad)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -185,7 +174,6 @@ public class HomeController {
 		return json;
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "/reclamos/persona/{documento}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getReclamoByPersona(@PathVariable String documento)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -195,7 +183,6 @@ public class HomeController {
 		return json;
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "/unidadesPorPersona/{dni}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getUnidadesPorPersona(@PathVariable String dni)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -206,8 +193,7 @@ public class HomeController {
 				.writeValueAsString(Controlador.getInstancia().unidadesPorPersona(dni));
 		return json;
 	}
-	
-	@CrossOrigin(origins = "http://localhost:3000")
+
 	@GetMapping(value = "/unidadesPorDuenio/{dni}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getUnidadesPorDuenio(@PathVariable String dni)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -218,8 +204,7 @@ public class HomeController {
 				.writeValueAsString(Controlador.getInstancia().unidadesPorDuenio(dni));
 		return json;
 	}
-	
-	@CrossOrigin(origins = "http://localhost:3000")
+
 	@GetMapping(value = "/unidadesPorInquilino/{dni}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getUnidadesPorInquilino(@PathVariable String dni)
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -230,8 +215,7 @@ public class HomeController {
 				.writeValueAsString(Controlador.getInstancia().unidadesPorInquilino(dni));
 		return json;
 	}
-	
-	@CrossOrigin(origins = "http://localhost:3000")
+
 	@GetMapping(value = "/personas", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getPersonas()
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
@@ -242,8 +226,7 @@ public class HomeController {
 				.writeValueAsString(Controlador.getInstancia().getPersonas());
 		return json;
 	}
-	
-	@CrossOrigin(origins = "http://localhost:3000")
+
 	@GetMapping(value = "/unidades", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody String getUnidades()
 			throws EdificioException, UnidadException, ReclamoException, PersonaException, JsonProcessingException {
